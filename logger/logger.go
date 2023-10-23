@@ -4,6 +4,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Loglevel int
+
+const (
+	PanicLevel Loglevel = iota
+	FatalLevel
+	ErrorLevel
+	WarnLevel
+	InfoLevel
+	DebugLevel
+	TraceLevel
+)
+
 type ILogger interface {
 	Debug(v ...interface{})
 	Info(v ...interface{})
@@ -15,17 +27,18 @@ type ILogger interface {
 
 var Log ILogger
 
-func Init() {
-	Log = NewLogrusLogger(logrus.ErrorLevel)
+func Init(logLevel Loglevel) {
+	Log = NewLogrusLogger(logLevel)
 }
 
 type logrusLogger struct {
 	log *logrus.Logger
 }
 
-func NewLogrusLogger(level logrus.Level) ILogger {
+func NewLogrusLogger(level Loglevel) ILogger {
 	logger := logrus.New()
-	logger.SetLevel(level)
+	logger.SetLevel(toLogrusLevel(level))
+
 	return &logrusLogger{log: logger}
 }
 
@@ -75,4 +88,23 @@ func Fatal(args ...interface{}) {
 
 func Critical(args ...interface{}) {
 	Log.Critical(args)
+}
+
+func toLogrusLevel(level Loglevel) logrus.Level {
+	switch level {
+	case DebugLevel:
+		return logrus.DebugLevel
+	case InfoLevel:
+		return logrus.InfoLevel
+	case WarnLevel:
+		return logrus.WarnLevel
+	case ErrorLevel:
+		return logrus.ErrorLevel
+	case FatalLevel:
+		return logrus.FatalLevel
+	case PanicLevel:
+		return logrus.PanicLevel
+	default:
+		return logrus.InfoLevel
+	}
 }
