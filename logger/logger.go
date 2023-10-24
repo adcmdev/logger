@@ -14,7 +14,7 @@ const (
 	WarnLevel
 	InfoLevel
 	DebugLevel
-	TraceLevel // Note: zap doesn't have a trace level, so this will map to debug
+	TraceLevel
 )
 
 type ILogger interface {
@@ -28,21 +28,34 @@ type ILogger interface {
 
 var Log ILogger
 
+var zaplogger *zapLogger
+
 func Init(logLevel Loglevel) {
 	Log = NewZapLogger(logLevel)
 }
 
 type zapLogger struct {
-	log *zap.SugaredLogger
+	log   *zap.SugaredLogger
+	level zap.AtomicLevel
 }
 
 func NewZapLogger(level Loglevel) ILogger {
-	config := zap.NewProductionConfig()
-	config.Level = zap.NewAtomicLevelAt(toZapLevel(level))
+	atom := zap.NewAtomicLevelAt(toZapLevel(level))
+
+	config := zap.Config{
+		Level:            atom,
+		Development:      false,
+		Encoding:         "json",
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
 	logger, _ := config.Build()
 	sugar := logger.Sugar()
 
-	return &zapLogger{log: sugar}
+	zaplogger = &zapLogger{log: sugar, level: atom}
+
+	return zaplogger
 }
 
 func (l *zapLogger) Debug(args ...interface{}) {
@@ -66,31 +79,35 @@ func (l *zapLogger) Fatal(args ...interface{}) {
 }
 
 func (l *zapLogger) Critical(args ...interface{}) {
-	l.log.DPanic(args...) // Using DPanic for critical which will panic in development and log error in production
+	l.log.DPanic(args...)
+}
+
+func SetLevel(level Loglevel) {
+	zaplogger.level.SetLevel(toZapLevel(level))
 }
 
 func Debug(args ...interface{}) {
-	Log.Debug(args)
+	Log.Debug(args...)
 }
 
 func Info(args ...interface{}) {
-	Log.Info(args)
+	Log.Info(args...)
 }
 
 func Warning(args ...interface{}) {
-	Log.Warning(args)
+	Log.Warning(args...)
 }
 
 func Error(args ...interface{}) {
-	Log.Error(args)
+	Log.Error(args...)
 }
 
 func Fatal(args ...interface{}) {
-	Log.Fatal(args)
+	Log.Fatal(args...)
 }
 
 func Critical(args ...interface{}) {
-	Log.Critical(args)
+	Log.Critical(args...)
 }
 
 func toZapLevel(level Loglevel) zapcore.Level {
@@ -109,5 +126,24 @@ func toZapLevel(level Loglevel) zapcore.Level {
 		return zapcore.PanicLevel
 	default:
 		return zapcore.InfoLevel
+	}
+}
+
+func LevelFromString(level string) Loglevel {
+	switch level {
+	case "debug":
+		return DebugLevel
+	case "info":
+		return InfoLevel
+	case "warn":
+		return WarnLevel
+	case "error":
+		return ErrorLevel
+	case "fatal":
+		return FatalLevel
+	case "panic":
+		return PanicLevel
+	default:
+		return InfoLevel
 	}
 }
