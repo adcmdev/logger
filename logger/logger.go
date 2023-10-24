@@ -144,6 +144,6 @@ func LevelFromString(level string) Loglevel {
 	case "panic":
 		return PanicLevel
 	default:
-		return InfoLevel
+		return ErrorLevel
 	}
 }
