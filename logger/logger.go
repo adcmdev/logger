@@ -1,7 +1,8 @@
 package logger
 
 import (
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Loglevel int
@@ -13,7 +14,7 @@ const (
 	WarnLevel
 	InfoLevel
 	DebugLevel
-	TraceLevel
+	TraceLevel // Note: zap doesn't have a trace level, so this will map to debug
 )
 
 type ILogger interface {
@@ -28,42 +29,44 @@ type ILogger interface {
 var Log ILogger
 
 func Init(logLevel Loglevel) {
-	Log = NewLogrusLogger(logLevel)
+	Log = NewZapLogger(logLevel)
 }
 
-type logrusLogger struct {
-	log *logrus.Logger
+type zapLogger struct {
+	log *zap.SugaredLogger
 }
 
-func NewLogrusLogger(level Loglevel) ILogger {
-	logger := logrus.New()
-	logger.SetLevel(toLogrusLevel(level))
+func NewZapLogger(level Loglevel) ILogger {
+	config := zap.NewProductionConfig()
+	config.Level = zap.NewAtomicLevelAt(toZapLevel(level))
+	logger, _ := config.Build()
+	sugar := logger.Sugar()
 
-	return &logrusLogger{log: logger}
+	return &zapLogger{log: sugar}
 }
 
-func (l *logrusLogger) Debug(args ...interface{}) {
-	l.log.Debugf("DEBUG: %v", args...)
+func (l *zapLogger) Debug(args ...interface{}) {
+	l.log.Debug(args...)
 }
 
-func (l *logrusLogger) Info(args ...interface{}) {
-	l.log.Infof("INFO: %v", args...)
+func (l *zapLogger) Info(args ...interface{}) {
+	l.log.Info(args...)
 }
 
-func (l *logrusLogger) Warning(args ...interface{}) {
-	l.log.Warnf("WARN: %v", args...)
+func (l *zapLogger) Warning(args ...interface{}) {
+	l.log.Warn(args...)
 }
 
-func (l *logrusLogger) Error(args ...interface{}) {
-	l.log.Errorf("ERROR: %v", args...)
+func (l *zapLogger) Error(args ...interface{}) {
+	l.log.Error(args...)
 }
 
-func (l *logrusLogger) Fatal(args ...interface{}) {
-	l.log.Fatalf("FATAL: %v", args...)
+func (l *zapLogger) Fatal(args ...interface{}) {
+	l.log.Fatal(args...)
 }
 
-func (l *logrusLogger) Critical(args ...interface{}) {
-	l.log.Panicf("PANIC: %v", args...)
+func (l *zapLogger) Critical(args ...interface{}) {
+	l.log.DPanic(args...) // Using DPanic for critical which will panic in development and log error in production
 }
 
 func Debug(args ...interface{}) {
@@ -90,21 +93,21 @@ func Critical(args ...interface{}) {
 	Log.Critical(args)
 }
 
-func toLogrusLevel(level Loglevel) logrus.Level {
+func toZapLevel(level Loglevel) zapcore.Level {
 	switch level {
 	case DebugLevel:
-		return logrus.DebugLevel
+		return zapcore.DebugLevel
 	case InfoLevel:
-		return logrus.InfoLevel
+		return zapcore.InfoLevel
 	case WarnLevel:
-		return logrus.WarnLevel
+		return zapcore.WarnLevel
 	case ErrorLevel:
-		return logrus.ErrorLevel
+		return zapcore.ErrorLevel
 	case FatalLevel:
-		return logrus.FatalLevel
+		return zapcore.FatalLevel
 	case PanicLevel:
-		return logrus.PanicLevel
+		return zapcore.PanicLevel
 	default:
-		return logrus.InfoLevel
+		return zapcore.InfoLevel
 	}
 }
