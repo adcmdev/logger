@@ -14,7 +14,6 @@ const (
 	WarnLevel
 	InfoLevel
 	DebugLevel
-	TraceLevel
 )
 
 type ILogger interface {
@@ -84,6 +83,7 @@ func (l *zapLogger) Critical(args ...interface{}) {
 
 func SetLevel(level Loglevel) {
 	zaplogger.level.SetLevel(toZapLevel(level))
+	LogByLogLevel(level, "Log level changed to ", LevelToString(level))
 }
 
 func Debug(args ...interface{}) {
@@ -145,5 +145,43 @@ func LevelFromString(level string) Loglevel {
 		return PanicLevel
 	default:
 		return ErrorLevel
+	}
+}
+
+func LevelToString(level Loglevel) string {
+	switch level {
+	case DebugLevel:
+		return "debug"
+	case InfoLevel:
+		return "info"
+	case WarnLevel:
+		return "warn"
+	case ErrorLevel:
+		return "error"
+	case FatalLevel:
+		return "fatal"
+	case PanicLevel:
+		return "panic"
+	default:
+		return "error"
+	}
+}
+
+func LogByLogLevel(level Loglevel, args ...interface{}) {
+	switch level {
+	case DebugLevel:
+		Log.Debug(args...)
+	case InfoLevel:
+		Log.Info(args...)
+	case WarnLevel:
+		Log.Warning(args...)
+	case ErrorLevel:
+		Log.Error(args...)
+	case FatalLevel:
+		Log.Fatal(args...)
+	case PanicLevel:
+		Log.Critical(args...)
+	default:
+		Log.Error(args...)
 	}
 }
