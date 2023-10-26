@@ -27,7 +27,7 @@ type ILogger interface {
 
 var Log ILogger
 
-var zaplogger *zapLogger
+var zapLoggerInstance *zapLogger
 
 func Init(logLevel Loglevel) {
 	Log = NewZapLogger(logLevel)
@@ -52,9 +52,9 @@ func NewZapLogger(level Loglevel) ILogger {
 	logger, _ := config.Build()
 	sugar := logger.Sugar()
 
-	zaplogger = &zapLogger{log: sugar, level: atom}
+	zapLoggerInstance = &zapLogger{log: sugar, level: atom}
 
-	return zaplogger
+	return zapLoggerInstance
 }
 
 func (l *zapLogger) Debug(args ...interface{}) {
@@ -82,7 +82,7 @@ func (l *zapLogger) Critical(args ...interface{}) {
 }
 
 func SetLevel(level Loglevel) {
-	zaplogger.level.SetLevel(toZapLevel(level))
+	zapLoggerInstance.level.SetLevel(toZapLevel(level))
 	LogByLogLevel(level, "Log level changed to ", LevelToString(level))
 }
 
