@@ -41,14 +41,20 @@ type zapLogger struct {
 func NewZapLogger(level Loglevel) ILogger {
 	atom := zap.NewAtomicLevelAt(toZapLevel(level))
 
+	encoderConfig := zapcore.EncoderConfig{
+		MessageKey: "msg",
+		LevelKey:   "level",
+	}
+
 	config := zap.Config{
 		Level:            atom,
 		Development:      false,
 		Encoding:         "json",
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
+		EncoderConfig:    encoderConfig,
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
 	}
+
 	logger, _ := config.Build()
 	sugar := logger.Sugar()
 
