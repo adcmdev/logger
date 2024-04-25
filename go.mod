@@ -1,4 +1,4 @@
-module github.com/ACDEV24/logger
+module github.com/adcmdev/logger
 
 go 1.22
 
