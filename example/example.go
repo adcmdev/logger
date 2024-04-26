@@ -3,7 +3,7 @@ package logger
 import "github.com/adcmdev/logger"
 
 func main() {
-	logger.Init(DebugLevel)
+	logger.Init(logger.DebugLevel)
 
 	logger.Log.Debug("Debug message")
 	logger.Log.Info("Info message")
