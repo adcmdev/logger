@@ -77,6 +77,30 @@ func SetLevel(level Loglevel) {
 	logrusLoggerInstance.log.SetLevel(toLogrusLevel(level))
 }
 
+func Debug(args ...interface{}) {
+	Log.Debug(args...)
+}
+
+func Info(args ...interface{}) {
+	Log.Info(args...)
+}
+
+func Warning(args ...interface{}) {
+	Log.Warning(args...)
+}
+
+func Error(args ...interface{}) {
+	Log.Error(args...)
+}
+
+func Fatal(args ...interface{}) {
+	Log.Fatal(args...)
+}
+
+func Critical(args ...interface{}) {
+	Log.Critical(args...)
+}
+
 func toLogrusLevel(level Loglevel) logrus.Level {
 	switch level {
 	case DebugLevel:
