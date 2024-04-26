@@ -1,7 +1,9 @@
 package logger
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -38,10 +40,16 @@ type logrusLogger struct {
 	log *logrus.Logger
 }
 
+type simpleFormatter struct{}
+
+func (f *simpleFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	return []byte(fmt.Sprintf("[%s] %s\n", strings.ToUpper(entry.Level.String()), entry.Message)), nil
+}
+
 func NewLogrusLogger(level Loglevel) ILogger {
 	logger := logrus.New()
 	logger.SetOutput(os.Stdout)
-	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger.SetFormatter(new(simpleFormatter))
 	logger.SetLevel(toLogrusLevel(level))
 
 	logrusLoggerInstance = &logrusLogger{log: logger}
