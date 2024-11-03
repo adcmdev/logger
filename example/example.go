@@ -1,14 +1,14 @@
-package logger
+package main
 
 import "github.com/adcmdev/logger"
 
 func main() {
-	logger.Init(logger.DebugLevel)
+	logger.New(logger.DebugLevel)
 
-	logger.Log.Debug("Debug message")
-	logger.Log.Info("Info message")
-	logger.Log.Warning("Warning message")
-	logger.Log.Error("Error message")
-	// logger.Log.Critical("Critical message")
-	// logger.Log.Fatal("Fatal message")
+	logger.Debug("Debug message")
+	logger.Info("Info message")
+	logger.Warning("Warning message")
+	logger.Error("Error message")
+
+	logger.Debug("Current log level is ", logger.LevelToString(logger.CurrentLevel()))
 }

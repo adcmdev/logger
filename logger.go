@@ -82,7 +82,10 @@ func (l *zapLogger) Critical(args ...interface{}) {
 }
 
 func CurrentLevel() Loglevel {
-	return Loglevel(zapLoggerInstance.level.Level())
+	zapLogLevel := zapLoggerInstance.level.Level()
+	logLevel := fromZapLevel(zapLogLevel)
+
+	return Loglevel(logLevel)
 }
 
 func SetLevel(level Loglevel) {
@@ -112,6 +115,25 @@ func Fatal(args ...interface{}) {
 
 func Critical(args ...interface{}) {
 	zapLoggerInstance.Critical(args...)
+}
+
+func fromZapLevel(level zapcore.Level) Loglevel {
+	switch level {
+	case zapcore.DebugLevel:
+		return DebugLevel
+	case zapcore.InfoLevel:
+		return InfoLevel
+	case zapcore.WarnLevel:
+		return WarnLevel
+	case zapcore.ErrorLevel:
+		return ErrorLevel
+	case zapcore.FatalLevel:
+		return FatalLevel
+	case zapcore.PanicLevel:
+		return PanicLevel
+	default:
+		return ErrorLevel
+	}
 }
 
 func toZapLevel(level Loglevel) zapcore.Level {
