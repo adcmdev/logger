@@ -1,11 +1,8 @@
 package logger
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Loglevel int
@@ -30,59 +27,69 @@ type ILogger interface {
 
 var Log ILogger
 
-var logrusLoggerInstance *logrusLogger
+var zapLoggerInstance *zapLogger
 
-func Init(logLevel Loglevel) {
-	Log = NewLogrusLogger(logLevel)
+type zapLogger struct {
+	log   *zap.SugaredLogger
+	level zap.AtomicLevel
 }
 
-type logrusLogger struct {
-	log *logrus.Logger
+func New(level Loglevel) ILogger {
+	atom := zap.NewAtomicLevelAt(toZapLevel(level))
+
+	encoderConfig := zapcore.EncoderConfig{
+		MessageKey: "msg",
+		LevelKey:   "level",
+	}
+
+	config := zap.Config{
+		Level:            atom,
+		Development:      false,
+		Encoding:         "json",
+		EncoderConfig:    encoderConfig,
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+
+	logger, _ := config.Build()
+	sugar := logger.Sugar()
+
+	zapLoggerInstance = &zapLogger{log: sugar, level: atom}
+
+	return zapLoggerInstance
 }
 
-type simpleFormatter struct{}
-
-func (f *simpleFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	return []byte(fmt.Sprintf("[%s] %s\n", strings.ToUpper(entry.Level.String()), entry.Message)), nil
-}
-
-func NewLogrusLogger(level Loglevel) ILogger {
-	logger := logrus.New()
-	logger.SetOutput(os.Stdout)
-	logger.SetFormatter(new(simpleFormatter))
-	logger.SetLevel(toLogrusLevel(level))
-
-	logrusLoggerInstance = &logrusLogger{log: logger}
-
-	return logrusLoggerInstance
-}
-
-func (l *logrusLogger) Debug(args ...interface{}) {
+func (l *zapLogger) Debug(args ...interface{}) {
 	l.log.Debug(args...)
 }
 
-func (l *logrusLogger) Info(args ...interface{}) {
+func (l *zapLogger) Info(args ...interface{}) {
 	l.log.Info(args...)
 }
 
-func (l *logrusLogger) Warning(args ...interface{}) {
+func (l *zapLogger) Warning(args ...interface{}) {
 	l.log.Warn(args...)
 }
 
-func (l *logrusLogger) Error(args ...interface{}) {
+func (l *zapLogger) Error(args ...interface{}) {
 	l.log.Error(args...)
 }
 
-func (l *logrusLogger) Fatal(args ...interface{}) {
+func (l *zapLogger) Fatal(args ...interface{}) {
 	l.log.Fatal(args...)
 }
 
-func (l *logrusLogger) Critical(args ...interface{}) {
-	l.log.Panic(args...)
+func (l *zapLogger) Critical(args ...interface{}) {
+	l.log.DPanic(args...)
+}
+
+func CurrentLevel() Loglevel {
+	return Loglevel(zapLoggerInstance.level.Level())
 }
 
 func SetLevel(level Loglevel) {
-	logrusLoggerInstance.log.SetLevel(toLogrusLevel(level))
+	zapLoggerInstance.level.SetLevel(toZapLevel(level))
+	LogByLogLevel(level, "Log level changed to ", LevelToString(level))
 }
 
 func Debug(args ...interface{}) {
@@ -109,22 +116,22 @@ func Critical(args ...interface{}) {
 	Log.Critical(args...)
 }
 
-func toLogrusLevel(level Loglevel) logrus.Level {
+func toZapLevel(level Loglevel) zapcore.Level {
 	switch level {
 	case DebugLevel:
-		return logrus.DebugLevel
+		return zapcore.DebugLevel
 	case InfoLevel:
-		return logrus.InfoLevel
+		return zapcore.InfoLevel
 	case WarnLevel:
-		return logrus.WarnLevel
+		return zapcore.WarnLevel
 	case ErrorLevel:
-		return logrus.ErrorLevel
+		return zapcore.ErrorLevel
 	case FatalLevel:
-		return logrus.FatalLevel
+		return zapcore.FatalLevel
 	case PanicLevel:
-		return logrus.PanicLevel
+		return zapcore.PanicLevel
 	default:
-		return logrus.InfoLevel
+		return zapcore.InfoLevel
 	}
 }
 
