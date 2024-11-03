@@ -25,8 +25,6 @@ type ILogger interface {
 	Critical(v ...interface{})
 }
 
-var Log ILogger
-
 var zapLoggerInstance *zapLogger
 
 type zapLogger struct {
@@ -93,27 +91,27 @@ func SetLevel(level Loglevel) {
 }
 
 func Debug(args ...interface{}) {
-	Log.Debug(args...)
+	zapLoggerInstance.Debug(args...)
 }
 
 func Info(args ...interface{}) {
-	Log.Info(args...)
+	zapLoggerInstance.Info(args...)
 }
 
 func Warning(args ...interface{}) {
-	Log.Warning(args...)
+	zapLoggerInstance.Warning(args...)
 }
 
 func Error(args ...interface{}) {
-	Log.Error(args...)
+	zapLoggerInstance.Error(args...)
 }
 
 func Fatal(args ...interface{}) {
-	Log.Fatal(args...)
+	zapLoggerInstance.Fatal(args...)
 }
 
 func Critical(args ...interface{}) {
-	Log.Critical(args...)
+	zapLoggerInstance.Critical(args...)
 }
 
 func toZapLevel(level Loglevel) zapcore.Level {
@@ -176,18 +174,18 @@ func LevelToString(level Loglevel) string {
 func LogByLogLevel(level Loglevel, args ...interface{}) {
 	switch level {
 	case DebugLevel:
-		Log.Debug(args...)
+		zapLoggerInstance.Debug(args...)
 	case InfoLevel:
-		Log.Info(args...)
+		zapLoggerInstance.Info(args...)
 	case WarnLevel:
-		Log.Warning(args...)
+		zapLoggerInstance.Warning(args...)
 	case ErrorLevel:
-		Log.Error(args...)
+		zapLoggerInstance.Error(args...)
 	case FatalLevel:
-		Log.Fatal(args...)
+		zapLoggerInstance.Fatal(args...)
 	case PanicLevel:
-		Log.Critical(args...)
+		zapLoggerInstance.Critical(args...)
 	default:
-		Log.Error(args...)
+		zapLoggerInstance.Error(args...)
 	}
 }
