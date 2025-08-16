@@ -1,4 +1,4 @@
-module github.com/adcmdev/logger
+module github.com/innovafour/logger
 
 go 1.22
 

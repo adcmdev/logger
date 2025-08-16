@@ -1,5 +1,5 @@
-github.com/adcmdev/logger v1.5.1 h1:j57bVLjb0U9G5naEz/GqhgGovWulwhj9ut3oyNJrUH8=
-github.com/adcmdev/logger v1.5.1/go.mod h1:726/vMZdc9wSz7tmlYUw1RMXZ0edJJv8JDu36M2uKo0=
+github.com/innovafour/logger v1.5.1 h1:j57bVLjb0U9G5naEz/GqhgGovWulwhj9ut3oyNJrUH8=
+github.com/innovafour/logger v1.5.1/go.mod h1:726/vMZdc9wSz7tmlYUw1RMXZ0edJJv8JDu36M2uKo0=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

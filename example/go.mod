@@ -2,7 +2,7 @@ module example
 
 go 1.22.2
 
-require github.com/adcmdev/logger v1.5.1
+require github.com/innovafour/logger v1.5.1
 
 require (
 	go.uber.org/multierr v1.10.0 // indirect
